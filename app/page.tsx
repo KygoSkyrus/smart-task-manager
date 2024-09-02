@@ -105,7 +105,7 @@ const Home: React.FC = () => {
 
       <div className="sm:p-8 p-4 mb-8">
         {/* Floating Navigation Bar */}
-        <div className="fixed bottom-4 sm:left-1/2 sm:translate-x-[-50%] rounded-md bg-gray-50 text-white p-2 shadow-md z-[9999]">
+        <div className="fixed bottom-4 sm:left-1/2 sm:translate-x-[-50%] rounded-md bg-gray-50 text-white p-2 shadow-lg z-[9999]">
           <div className="">
             <div className="sm:block">
               <nav className="flex gap-6" aria-label="Tabs">

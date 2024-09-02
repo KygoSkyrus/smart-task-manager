@@ -17,7 +17,9 @@ import dayjs from "dayjs";
 import { Pie, Bar, Line } from "react-chartjs-2";
 import { AppDispatch, RootState } from "../../redux/store";
 import Header from "@/components/Header";
-import { fetchTasks, Task } from "@/redux/tasksSlice";
+import { setTasks, Task } from "@/redux/tasksSlice";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 Chart.register(
   ArcElement,
@@ -44,7 +46,23 @@ const Dashboard: React.FC = () => {
   const [last7Days, setLast7Days] = useState<any[]>([]);
 
   useEffect(() => {
-    dispatch(fetchTasks());
+    const unsubscribe = onSnapshot(
+      collection(db, "tasks"),
+      (snapshot) => {
+        const tasksData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Task[];
+
+        dispatch(setTasks(tasksData));
+      },
+      (error) => {
+        console.error("Error fetching tasks: ", error);
+      }
+    );
+
+    // Cleanup on component unmount
+    return () => unsubscribe();
   }, [dispatch]);
 
   useEffect(() => {

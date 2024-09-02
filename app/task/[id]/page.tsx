@@ -20,7 +20,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import Image from "next/image";
-import { Anton } from "next/font/google";
 import { getPriorityColor } from "@/lib/util";
 import Header from "@/components/Header";
 

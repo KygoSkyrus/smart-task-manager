@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -21,6 +22,7 @@ const LoginForm = () => {
     
     if (response.status === 200) {
       const { token } = await response.data;
+      toast.success('User Logged In!!!')
       router.push("/");
     } else {
       const { message } = await response.data;

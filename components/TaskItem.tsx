@@ -1,12 +1,11 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import {Icon} from 'leaflet'
-import "leaflet/dist/leaflet.css";
+const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
 
 import {
   Task,
@@ -23,7 +22,7 @@ interface TaskItemProps {
     title: string;
     description: string;
     dueDate: string;
-    priority: string;
+    priority: "Low" | "Medium" | "High";
     location: {
       lat: number;
       lng: number;
@@ -42,12 +41,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   };
 
   const handleEdit = (event: React.MouseEvent) => {
-    event.stopPropagation(); 
+    event.stopPropagation();
     router.push(`/task/${task.id}/edit`);
   };
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.stopPropagation(); 
+    event.stopPropagation();
 
     const newCompletedStatus = !task.completed;
     const copiedTask = { ...task };
@@ -63,26 +62,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   return (
     <div className="block rounded-lg p-4 shadow-sm hover:shadow-md shadow-indigo-100 cursor-pointer">
       {task.location?.lat ? (
-        <MapContainer
-          center={task?.location}
-          zoom={13}
+        <MapComponent
+          location={task.location}
+          // setLocation={task.location}
+          isUserEventsDisabled={true}
           style={{ height: "224px", width: "100%", borderRadius: "8px" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <Marker
-            position={task?.location}
-            icon={
-              new Icon({
-                iconUrl: "/marker-icon.png",
-                iconSize: [25, 25],
-                iconAnchor: [12, 41],
-              })
-            }
-          />
-        </MapContainer>
+        />
       ) : (
         <Image
           alt=""
@@ -102,7 +87,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
             </section>
             {task?.completed && (
               <div>
-                <dd className="ms-2 text-green-500 uppercase text-xs font-semibold">Completed</dd>
+                <dd className="ms-2 text-green-500 uppercase text-xs font-semibold">
+                  Completed
+                </dd>
               </div>
             )}
           </Link>
@@ -206,7 +193,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
 
               <div className="mt-1.5 sm:mt-0">
                 <p className="text-gray-500">Priority</p>
-                <p className={`${getPriorityColor(task.priority)}  font-medium`}>
+                <p
+                  className={`${getPriorityColor(task.priority)}  font-medium`}
+                >
                   {task.priority}
                 </p>
               </div>

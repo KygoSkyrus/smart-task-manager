@@ -14,9 +14,10 @@ import {
   appendTaskList,
   deleteTask,
   editTask,
+  Task,
   updateTaskStatus,
 } from "../../../redux/tasksSlice";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import Image from "next/image";
@@ -44,14 +45,23 @@ const TaskDetailPage: React.FC = () => {
         setLoading(false);
       } else {
         // Otherwise, fetch the task from Firestore using the ID
-        if (id) {
+        if (typeof id == 'string' && id) {
           try {
-            const taskDocRef = doc(db, "tasks", id);
+            const taskDocRef = doc(db, 'tasks', id);
             const taskSnapshot = await getDoc(taskDocRef);
 
             if (taskSnapshot.exists()) {
               setTask({ id: taskSnapshot.id, ...taskSnapshot.data() });
-              const tempTask = { id: taskSnapshot.id, ...taskSnapshot.data() };
+              const taskData = taskSnapshot.data();
+              const tempTask: Task = {
+                id: taskSnapshot.id,
+                title: taskData.title || '', 
+                description: taskData.description || '',
+                dueDate: taskData.dueDate,  
+                priority: taskData.priority || 'low', 
+                location: taskData.location,
+                completed: taskData.completetd,
+              };
               dispatch(appendTaskList(tempTask));
             } else {
               toast.error("Task not found.");

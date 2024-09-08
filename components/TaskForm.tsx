@@ -2,17 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { doc, getDoc } from "firebase/firestore";
-
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { Icon } from "leaflet";
-import "leaflet/dist/leaflet.css";
-
 import { db } from "@/lib/firebase";
 import { AppDispatch } from "@/redux/store";
 import { addTask, editTask } from "../redux/tasksSlice";
+
+const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
 
 const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
   const [title, setTitle] = useState(existingTask?.title || "");
@@ -31,7 +29,7 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
 
   useEffect(() => {
     const fetchTask = async () => {
-      if (!existingTask && id) {
+      if (!existingTask && id && typeof id == "string") {
         setLoading(true);
         try {
           const taskDocRef = doc(db, "tasks", id);
@@ -63,7 +61,20 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const task = {
+      const taskId = Array.isArray(id) ? id[0] : id; // Convert to string if it's an array
+      const aTask = {
+        title,
+        description,
+        dueDate,
+        priority,
+        location: {
+          lat: location.lat,
+          lng: location.lng,
+        },
+        completed,
+      };
+      const eTask = {
+        id: taskId,
         title,
         description,
         dueDate,
@@ -77,12 +88,12 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
 
       if (existingTask || id) {
         // Update the task
-        task["id"] = existingTask?.id || id;
-        dispatch(editTask(task));
+        eTask["id"] = existingTask?.id || id;
+        dispatch(editTask(eTask));
         toast.success("Task updated successfully!!!");
       } else {
         // Create a new task
-        dispatch(addTask(task));
+        dispatch(addTask(aTask));
         toast.success("Task created successfully!!!");
       }
 
@@ -94,26 +105,6 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
     } catch (error) {
       console.log(error);
     }
-  };
-
-  const MapEvents = () => {
-    useMapEvents({
-      click(e) {
-        setLocation(e.latlng);
-      },
-    });
-    return location ? (
-      <Marker
-        position={location}
-        icon={
-          new Icon({
-            iconUrl: "/marker-icon.png",
-            iconSize: [25, 25],
-            iconAnchor: [12, 41],
-          })
-        }
-      />
-    ) : null;
   };
 
   if (loading) {
@@ -191,18 +182,7 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
 
             <div>
               {(location?.lat || !existingTask || !id) && (
-                <MapContainer
-                  center={[51.505, -0.09]}
-                  zoom={13}
-                  style={{ height: "400px", width: "100%" }}
-                  className="relative block rounded-lg border border-gray-200 focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <MapEvents />
-                </MapContainer>
+                <MapComponent location={location} setLocation={setLocation} isUserEventsDisabled={false} style={{ height: "400px", width: "100%" }} />
               )}
             </div>
 
@@ -232,7 +212,6 @@ const TaskForm: React.FC<{ existingTask?: any }> = ({ existingTask }) => {
             </button>
           </form>
         </div>
-
       </section>
     </>
   );

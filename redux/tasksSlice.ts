@@ -47,11 +47,12 @@ export const fetchTasks = createAsyncThunk("tasks/fetchTasks", async () => {
 export const addTask = createAsyncThunk(
   "tasks/addTask",
   async (newTask: Omit<Task, "id">) => {
-    try{
-    const docRef = await addDoc(collection(db, "tasks"), newTask);
-    return { id: docRef.id, ...newTask };
-    }catch (error){
-      console.log('e',error)
+    try {
+      const docRef = await addDoc(collection(db, "tasks"), newTask);
+      return { id: docRef.id, ...newTask };
+    } catch (error) {
+      console.log("e", error);
+      return undefined; // Return undefined if there is an error
     }
   }
 );
@@ -60,7 +61,17 @@ export const editTask = createAsyncThunk(
   "tasks/editTask",
   async (updatedTask: Task) => {
     const taskDocRef = doc(db, "tasks", updatedTask.id);
-    await updateDoc(taskDocRef, updatedTask);
+    // Converting the task object into a format suitable for Firestore update
+    const taskUpdateData = {
+      title: updatedTask.title || "",
+      description: updatedTask.description,
+      dueDate: updatedTask.dueDate,
+      priority: updatedTask.priority,
+      "location.lat": updatedTask.location.lat, // Using Firestore's dot notation for nested fields
+      "location.lng": updatedTask.location.lng,
+      completed: updatedTask.completed,
+    };
+    await updateDoc(taskDocRef, taskUpdateData);
     return updatedTask;
   }
 );
@@ -109,7 +120,7 @@ const tasksSlice = createSlice({
         state.error = action.error.message || "Failed to fetch tasks";
       })
       .addCase(addTask.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);
+        if (action.payload) state.tasks.push(action.payload);
       })
       .addCase(addTask.rejected, (state, action) => {
         state.loading = false;
@@ -129,5 +140,6 @@ const tasksSlice = createSlice({
   },
 });
 
-export const { setTasks, updateTaskStatus,appendTaskList } = tasksSlice.actions;
+export const { setTasks, updateTaskStatus, appendTaskList } =
+  tasksSlice.actions;
 export default tasksSlice.reducer;

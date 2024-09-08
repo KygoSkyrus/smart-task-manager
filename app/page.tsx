@@ -165,7 +165,7 @@ const Home: React.FC = () => {
             <div className="h-64 rounded-lg bg-gray-200"></div>
           </div>
         ) : filteredTasks.length === 0 ? (
-          <p>No tasks available.</p>
+          <p>No tasks available</p>
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
             {filteredTasks.map((task: Task) => (

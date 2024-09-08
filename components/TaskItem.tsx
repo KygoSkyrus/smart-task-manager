@@ -7,13 +7,8 @@ import Link from "next/link";
 
 const MapComponent = dynamic(() => import("./MapComponent"), { ssr: false });
 
-import {
-  Task,
-  deleteTask,
-  editTask,
-  updateTaskStatus,
-} from "../redux/tasksSlice";
-import { AppDispatch, RootState } from "../redux/store";
+import { deleteTask, editTask, updateTaskStatus } from "../redux/tasksSlice";
+import { AppDispatch } from "../redux/store";
 import { getPriorityColor } from "@/lib/util";
 
 interface TaskItemProps {
@@ -81,17 +76,21 @@ const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
       )}
       <div className="mt-2">
         <div className="flex justify-between">
-          <Link href={`/task/${task.id}`} className="flex items-center">
+          <Link href={`/task/${task.id}`} className="">
+            <div>
+              <dd
+                className={`${
+                  task?.completed ? "text-green-400" : "text-red-300"
+                } uppercase text-xs font-semibold`}
+              >
+                {task?.completed ? "Completed" : "In Progress"}
+              </dd>
+            </div>
             <section>
-              <section className="font-medium capitalize">{task.title}</section>
+              <section className="font-medium capitalize max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap" title={task.title}>
+                {task.title}
+              </section>
             </section>
-            {task?.completed && (
-              <div>
-                <dd className="ms-2 text-green-500 uppercase text-xs font-semibold">
-                  Completed
-                </dd>
-              </div>
-            )}
           </Link>
           <div className="flex gap-3">
             <div className="flex items-center">

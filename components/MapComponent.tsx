@@ -20,7 +20,6 @@ interface MapComponentProps {
   style?: React.CSSProperties; // Add style prop
 }
 
-// const MapComponent = () => {
 const MapComponent: React.FC<MapComponentProps> = ({
   location,
   setLocation,

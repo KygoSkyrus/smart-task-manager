@@ -1,26 +1,20 @@
-"use client";
+import EditTaskPage from "@/components/EditTaskPage";
+import { getDocs, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-import React from "react";
-import { useSelector } from "react-redux";
-import { useParams } from "next/navigation";
-import { RootState } from "../../../../redux/store";
-import TaskForm from "../../../../components/TaskForm";
-import Header from "@/components/Header";
+// Generate static params for editing task pages
+export async function generateStaticParams() {
+  const tasksCollection = collection(db, "tasks");
+  const taskDocs = await getDocs(tasksCollection);
 
-const EditTaskPage: React.FC = () => {
-  const { id } = useParams();
-  const task = useSelector((state: RootState) =>
-    state.tasks.tasks.find((task) => task.id === id)
-  );
+  return taskDocs.docs.map((doc) => ({
+    id: doc.id,
+  }));
+}
 
-  return (
-    <>
-      <Header title="Edit Task" />
-      <div className="sm:p-8 p-4 mb-8">
-        <TaskForm existingTask={task} />
-      </div>
-    </>
-  );
+// Server-side page component
+const EditTask = ({ params }: { params: { id: string } }) => {
+  return <EditTaskPage id={params.id} />; 
 };
 
-export default EditTaskPage;
+export default EditTask;

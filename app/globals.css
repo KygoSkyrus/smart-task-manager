@@ -21,7 +21,7 @@ body {
   padding: 0;
   box-sizing: border-box;
   /* color: rgb(var(--foreground-rgb)); */
-  color: rgb(var(--background-end-rgb));
+  /* color: rgb(var(--background-end-rgb)); */
   /* background-image: linear-gradient(45deg, #585858, #362e3d, #1f2124, #1f271f); */
 }
 
